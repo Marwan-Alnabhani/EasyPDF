@@ -53,5 +53,7 @@ jobs:
 
             The installers aren't code-signed yet, so Windows SmartScreen may warn on first run
             ("More info" → "Run anyway").
+
+            No install needed? Use the web version: https://marwan-alnabhani.github.io/EasyPDF/
           releaseDraft: true
           prerelease: false

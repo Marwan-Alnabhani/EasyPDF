@@ -6,6 +6,9 @@ A free, private PDF toolkit that runs entirely on your device, in the browser or
 desktop app. There is no backend: files are processed by code running on your device, and the desktop
 app works without an internet connection.
 
+**Use it in the browser:** https://marwan-alnabhani.github.io/EasyPDF/ · **Windows app:**
+[Releases page](https://github.com/Marwan-Alnabhani/EasyPDF/releases)
+
 ## Tools
 
 | Tool | What it does |
