@@ -2,7 +2,8 @@
   "name": "easypdf",
   "private": true,
   "version": "1.0.0",
-  "description": "Private, offline PDF toolkit that runs entirely in your browser",
+  "description": "Private, offline PDF toolkit that runs entirely on your device",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "assets": "node scripts/copy-pdfjs-assets.mjs",

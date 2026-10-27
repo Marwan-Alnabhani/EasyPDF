@@ -377,15 +377,14 @@ export async function writeMetadata(bytes: Uint8Array, m: Metadata | null): Prom
 // ---------------------------------------------------------------------------
 // Compression
 
-/** Lossless: re-saves the file with compressed object streams and drops unused objects. */
+/**
+ * Lossless: re-saves the original document with compressed object streams.
+ * The document itself is untouched (bookmarks, forms, attachments and metadata
+ * are all kept); copying pages into a new document would drop them.
+ */
 export async function optimizeLossless(bytes: Uint8Array): Promise<Uint8Array> {
-  const src = await loadPdf(bytes);
-  const out = await PDFDocument.create();
-  const pages = await out.copyPages(src, src.getPageIndices());
-  pages.forEach((p) => out.addPage(p));
-  out.setTitle(src.getTitle() ?? "");
-  out.setAuthor(src.getAuthor() ?? "");
-  return save(out);
+  const doc = await loadPdf(bytes);
+  return doc.save({ useObjectStreams: true });
 }
 
 /**

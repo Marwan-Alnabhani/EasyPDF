@@ -1,7 +1,7 @@
 # easyPDF
 
-A free, private PDF toolkit that runs entirely in your browser. Files are never uploaded:
-all processing happens on your device, and the app works offline.
+A free, private PDF toolkit that runs entirely on your device, in the browser or as a Windows
+desktop app. Files are never uploaded: all processing happens locally, and the app works offline.
 
 ## Tools
 
@@ -24,6 +24,8 @@ Organizer shortcuts: `Del` delete · `R` / `Shift+R` rotate · `Ctrl+D` duplicat
 Requires [Node.js](https://nodejs.org) 22+.
 
 ```bash
+git clone https://github.com/Marwan-Alnabhani/EasyPDF.git
+cd EasyPDF
 npm install
 npm run dev          # development server at http://127.0.0.1:5173
 ```
@@ -42,8 +44,9 @@ Both servers listen on `127.0.0.1` only, so they are not reachable from other ma
 easyPDF is also packaged as a native desktop app with [Tauri](https://tauri.app). It uses the
 Microsoft Edge WebView2 runtime that ships with Windows, so the installer is under 4 MB.
 
-**Install:** run `src-tauri/target/release/bundle/nsis/easyPDF_1.0.0_x64-setup.exe`
-(per-user install, no admin rights needed), or use the `.msi` in `bundle/msi/`.
+**Install:** download the installer from the
+[Releases page](https://github.com/Marwan-Alnabhani/EasyPDF/releases) (`easyPDF_<version>_x64-setup.exe`
+installs per user, no admin rights needed; an `.msi` is also provided), or build it yourself as below.
 
 **Build it yourself** (needs Rust 1.90+ via [rustup](https://rustup.rs) and the MSVC C++ build tools):
 
@@ -51,6 +54,8 @@ Microsoft Edge WebView2 runtime that ships with Windows, so the installer is und
 npm run desktop          # run in a window with hot reload
 npm run desktop:build    # produce the installers in src-tauri/target/release/bundle/
 ```
+
+The app version comes from `package.json` (`src-tauri/Cargo.toml` should be kept in step with it).
 
 In the desktop app, downloads become a native **Save as…** dialog. Drag-and-drop from Explorer works as usual.
 
@@ -66,6 +71,7 @@ Desktop security model:
   Mozilla's [pdf.js](https://mozilla.github.io/pdf.js/). There is no backend.
 - **No external requests.** pdf.js fonts, CMaps and decoders are bundled locally (`scripts/copy-pdfjs-assets.mjs`).
 - **Strict Content-Security-Policy** in production builds: the page can only load its own files and cannot send data anywhere.
+  It is defined once in `src-tauri/tauri.conf.json` and shared by the web build and the desktop app.
 - All dependencies are free, open-source (MIT / Apache-2.0 / ISC).
 
 ## Known limitations
@@ -74,7 +80,14 @@ Desktop security model:
 - Password-protected PDFs can't be edited yet. Remove the password first.
 - Watermark and page-number text uses the built-in PDF fonts, which only support Latin characters.
 - "Strong" compression makes text unselectable (pages become images). Use "Lossless" to keep text.
+- Tools that build a new document from pages (Organize, Merge, Split, Create PDF, Strong compression) don't
+  carry over bookmarks, fillable form fields or file attachments. Watermark, Page Numbers, Metadata and
+  Lossless compression edit the original file and keep them.
 
 ## Tech
 
 Vite + React + TypeScript · pdf-lib · pdfjs-dist · dnd-kit (drag & drop) · fflate (zip) · lucide-react (icons).
+
+## License
+
+[MIT](LICENSE)

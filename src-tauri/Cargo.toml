@@ -2,7 +2,8 @@
 name = "easypdf"
 version = "1.0.0"
 description = "Private, offline PDF toolkit"
-authors = ["easyPDF"]
+authors = ["Marwan Alnabhani"]
+license = "MIT"
 edition = "2021"
 
 [lib]
@@ -16,6 +17,7 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = [] }
 tauri-plugin-dialog = "2"
 percent-encoding = "2"
+tokio = { version = "1", features = ["sync"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 

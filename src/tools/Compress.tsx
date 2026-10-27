@@ -58,8 +58,8 @@ export default function Compress() {
           </Field>
           {mode === "lossless" ? (
             <p className="muted">
-              Rebuilds the file and packs its internal structure more tightly. Text, links and quality are untouched, so
-              savings are usually modest.
+              Packs the file's internal structure more tightly. Text, links, bookmarks, forms and quality are untouched,
+              so savings are usually modest.
             </p>
           ) : (
             <>

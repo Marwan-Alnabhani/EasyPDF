@@ -31,7 +31,8 @@ export default function Split() {
       if (mode === "ranges") groups = parseRangeGroups(ranges, total);
       else if (mode === "extract") groups = [parsePageList(extract, total)];
       else {
-        const n = mode === "each" ? 1 : Math.max(1, Math.floor(every));
+        if (mode === "every" && !(every >= 1)) throw new Error("Enter how many pages each file should have (1 or more)");
+        const n = mode === "each" ? 1 : Math.floor(every);
         groups = [];
         for (let i = 0; i < total; i += n) groups.push(Array.from({ length: Math.min(n, total - i) }, (_, k) => i + k));
       }

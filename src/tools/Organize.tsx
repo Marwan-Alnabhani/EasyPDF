@@ -277,6 +277,10 @@ export default function Organize() {
     }
   };
 
+  // Render thumbnails to match the zoom level and screen density, in steps so
+  // dragging the zoom slider doesn't re-render every page on each tick.
+  const thumbWidth = Math.min(1280, Math.ceil((zoom * (window.devicePixelRatio || 1)) / 160) * 160);
+
   const activeItem = activeId ? pages.find((p) => p.id === activeId) : undefined;
   const dragCount = activeId && selected.has(activeId) ? selected.size : 1;
 
@@ -420,6 +424,7 @@ export default function Organize() {
                 key={p.id}
                 item={p}
                 index={i}
+                thumbWidth={thumbWidth}
                 selected={selected.has(p.id)}
                 dimmed={activeId !== null && dragCount > 1 && selected.has(p.id) && p.id !== activeId}
                 color={p.sourceId ? getSource(p.sourceId).color : "#888"}
@@ -436,7 +441,7 @@ export default function Organize() {
         <DragOverlay>
           {activeItem && (
             <div className="page-card overlay" style={{ "--thumb": `${zoom}px` } as React.CSSProperties}>
-              <Thumb item={activeItem} />
+              <Thumb item={activeItem} width={thumbWidth} />
               {dragCount > 1 && <span className="drag-count">{dragCount}</span>}
             </div>
           )}
@@ -460,6 +465,7 @@ export default function Organize() {
 interface CardProps {
   item: PageItem;
   index: number;
+  thumbWidth: number;
   selected: boolean;
   dimmed: boolean;
   color: string;
@@ -491,7 +497,7 @@ const PageCard = memo(function PageCard(props: CardProps) {
       {...listeners}
       aria-label={`Page ${index + 1}: ${label}`}
     >
-      <Thumb item={item} />
+      <Thumb item={item} width={props.thumbWidth} />
       <div className="card-actions" onPointerDown={stop} onClick={stop} onDoubleClick={stop}>
         <button className="icon-btn" onClick={props.onPreview} title="Preview">
           <Eye size={15} />
@@ -520,7 +526,7 @@ const PageCard = memo(function PageCard(props: CardProps) {
   );
 });
 
-function Thumb({ item }: { item: PageItem }) {
+function Thumb({ item, width }: { item: PageItem; width: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const [url, setUrl] = useState<string | null>(null);
   const { sourceId, pageIndex } = item;
@@ -532,7 +538,8 @@ function Thumb({ item }: { item: PageItem }) {
       (entries) => {
         if (!entries.some((e) => e.isIntersecting)) return;
         io.disconnect();
-        getThumbnail(sourceId, pageIndex)
+        // The previous image stays on screen until the new size is ready.
+        getThumbnail(sourceId, pageIndex, width)
           .then((u) => alive && setUrl(u))
           .catch(() => {});
       },
@@ -543,7 +550,7 @@ function Thumb({ item }: { item: PageItem }) {
       alive = false;
       io.disconnect();
     };
-  }, [sourceId, pageIndex]);
+  }, [sourceId, pageIndex, width]);
 
   const rot = { transform: `rotate(${item.rotation}deg)` };
   let inner;

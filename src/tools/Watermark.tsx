@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Stamp } from "lucide-react";
-import { PdfPreview, useSinglePdf } from "../components/SinglePdf";
+import { PdfPreview, useSinglePage, useSinglePdf } from "../components/SinglePdf";
 import { Field, PageScope, PrimaryButton, Segmented, ToolHeader, useTask } from "../components/ui";
 import { baseName, download, parsePageList } from "../lib/files";
-import { addWatermark, extractPages, loadPdf, type WatermarkOptions } from "../lib/pdf";
+import { addWatermark, type WatermarkOptions } from "../lib/pdf";
 
 export default function Watermark() {
   const { pdf, picker } = useSinglePdf();
+  const singlePage = useSinglePage(pdf);
   const { busy, progress, run } = useTask();
   const [text, setText] = useState("CONFIDENTIAL");
   const [fontSize, setFontSize] = useState(60);
@@ -34,8 +35,7 @@ export default function Watermark() {
   const buildPreview = async () => {
     if (!pdf || !text.trim()) return null;
     const first = targetPages()?.[0] ?? 0;
-    const single = await extractPages(await loadPdf(pdf.bytes), [first]);
-    return addWatermark(single, options(null));
+    return addWatermark(await singlePage(first), options(null));
   };
 
   return (

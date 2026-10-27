@@ -3,7 +3,8 @@ import { FileText, X } from "lucide-react";
 import { FileDrop } from "./FileDrop";
 import { useNotify } from "./ui";
 import { PDF_ACCEPT, formatBytes, readBytes } from "../lib/files";
-import { loadPdf } from "../lib/pdf";
+import type { PDFDocument } from "pdf-lib";
+import { extractPages, loadPdf } from "../lib/pdf";
 import { closePdf, openPdf, renderPage } from "../lib/pdfjs";
 
 export interface LoadedPdf {
@@ -57,6 +58,35 @@ export function useSinglePdf() {
   );
 
   return { pdf, picker };
+}
+
+/**
+ * Returns a function that gives one page of `pdf` as its own small PDF. The
+ * document is parsed once per file and each page extracted once, so live
+ * previews stay fast on large documents.
+ */
+export function useSinglePage(pdf: LoadedPdf | null) {
+  const cache = useRef<{ bytes: Uint8Array; doc: Promise<PDFDocument>; pages: Map<number, Promise<Uint8Array>> } | null>(
+    null,
+  );
+  return (pageIndex: number): Promise<Uint8Array> => {
+    if (!pdf) throw new Error("No PDF loaded");
+    if (cache.current?.bytes !== pdf.bytes) {
+      const doc = loadPdf(pdf.bytes, pdf.file.name);
+      doc.catch(() => {
+        if (cache.current?.doc === doc) cache.current = null;
+      });
+      cache.current = { bytes: pdf.bytes, doc, pages: new Map() };
+    }
+    const { doc, pages } = cache.current;
+    let page = pages.get(pageIndex);
+    if (!page) {
+      page = doc.then((d) => extractPages(d, [pageIndex]));
+      page.catch(() => pages.delete(pageIndex));
+      pages.set(pageIndex, page);
+    }
+    return page;
+  };
 }
 
 /**

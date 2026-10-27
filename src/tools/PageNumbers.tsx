@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Hash } from "lucide-react";
-import { PdfPreview, useSinglePdf } from "../components/SinglePdf";
+import { PdfPreview, useSinglePage, useSinglePdf } from "../components/SinglePdf";
 import { Field, PageScope, PrimaryButton, Segmented, ToolHeader, useTask } from "../components/ui";
 import { baseName, download, parsePageList } from "../lib/files";
-import { addPageNumbers, extractPages, loadPdf, type PageNumberOptions } from "../lib/pdf";
+import { addPageNumbers, type PageNumberOptions } from "../lib/pdf";
 
 const FORMATS = [
   { value: "{n}", label: "1" },
@@ -15,6 +15,7 @@ const FORMATS = [
 
 export default function PageNumbers() {
   const { pdf, picker } = useSinglePdf();
+  const singlePage = useSinglePage(pdf);
   const { busy, progress, run } = useTask();
   const [vertical, setVertical] = useState<PageNumberOptions["vertical"]>("bottom");
   const [horizontal, setHorizontal] = useState<PageNumberOptions["horizontal"]>("center");
@@ -50,7 +51,7 @@ export default function PageNumbers() {
   const buildPreview = async () => {
     if (!pdf) return null;
     const first = targetPages()?.[0] ?? 0;
-    const single = await extractPages(await loadPdf(pdf.bytes), [first]);
+    const single = await singlePage(first);
     // Preview uses the real total so "{total}" shows correctly.
     const total = all ? pdf.pageCount : targetPages()!.length;
     return addPageNumbers(single, { ...options(null), format: format.replaceAll("{total}", String(total + startAt - 1)) });

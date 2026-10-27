@@ -22,7 +22,14 @@ export default function Metadata() {
 
   useEffect(() => {
     if (!pdf) return setMeta(EMPTY);
-    readMetadata(pdf.bytes).then(({ pageCount: _, ...m }) => setMeta(m)).catch(() => setMeta(EMPTY));
+    // Ignore a slow read that finishes after another file was picked.
+    let current = true;
+    readMetadata(pdf.bytes)
+      .then(({ pageCount: _, ...m }) => current && setMeta(m))
+      .catch(() => current && setMeta(EMPTY));
+    return () => {
+      current = false;
+    };
   }, [pdf]);
 
   const save = (strip: boolean) =>
