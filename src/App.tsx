@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState, type ComponentType, type ReactNode } from "react";
-import { Combine, FileImage, Hash, Images, Info, Layers, Minimize2, Scissors, ShieldCheck, Stamp } from "lucide-react";
+import { Combine, FileImage, HardDrive, Hash, Images, Info, Layers, Minimize2, Scissors, Stamp } from "lucide-react";
 import { NotifyProvider, ToolActiveContext } from "./components/ui";
 
 interface Tool {
@@ -70,10 +70,10 @@ export default function App() {
             ))}
           </nav>
           <div className="privacy">
-            <ShieldCheck size={18} />
+            <HardDrive size={18} />
             <div>
-              <strong>100% private</strong>
-              <span>Files are processed on your device and never uploaded. Works offline.</span>
+              <strong>Runs on this device</strong>
+              <span>easyPDF has no backend: your files are opened, edited and saved by code running here.</span>
             </div>
           </div>
         </aside>

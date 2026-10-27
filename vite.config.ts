@@ -1,6 +1,6 @@
 import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
-import tauriConf from "./src-tauri/tauri.conf.json";
+import tauriConf from "./src-tauri/tauri.conf.json" with { type: "json" };
 
 // Strict Content-Security-Policy for production builds: the page may only load
 // its own files, and cannot send data anywhere (connect-src is limited to

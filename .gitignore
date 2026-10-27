@@ -1,5 +1,6 @@
 node_modules
 dist
 public/pdfjs
+public/THIRD_PARTY_LICENSES.txt
 *.tsbuildinfo
 src-tauri/target

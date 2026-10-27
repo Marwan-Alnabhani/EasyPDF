@@ -6,12 +6,15 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "assets": "node scripts/copy-pdfjs-assets.mjs",
+    "assets": "node scripts/copy-pdfjs-assets.mjs && node scripts/third-party-licenses.mjs",
+    "licenses": "node scripts/third-party-licenses.mjs --force",
     "predev": "npm run assets",
     "prebuild": "npm run assets",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc -b",
     "tauri": "tauri",
     "desktop": "tauri dev",
     "desktop:build": "tauri build"
@@ -34,6 +37,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "typescript": "^7.0.2",
-    "vite": "^8.3.5"
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
   }
 }

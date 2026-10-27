@@ -161,28 +161,32 @@ async function embedImage(doc: PDFDocument, file: File) {
   return doc.embedPng(await readBytes(await canvasToBlob(canvas, "image/png")));
 }
 
-/** Reads the EXIF orientation tag from a JPEG (1 = normal). */
-function jpegOrientation(b: Uint8Array): number {
+/** Reads the EXIF orientation tag from a JPEG (1 = normal, also for missing or damaged EXIF data). */
+export function jpegOrientation(b: Uint8Array): number {
   const view = new DataView(b.buffer, b.byteOffset, b.byteLength);
-  let off = 2;
-  while (off + 4 < b.length) {
-    if (b[off] !== 0xff) return 1;
-    const marker = b[off + 1];
-    const len = view.getUint16(off + 2);
-    if (marker === 0xe1 && view.getUint32(off + 4) === 0x45786966) {
-      const tiff = off + 10;
-      const little = view.getUint16(tiff) === 0x4949;
-      const ifd = tiff + view.getUint32(tiff + 4, little);
-      const count = view.getUint16(ifd, little);
-      for (let i = 0; i < count; i++) {
-        const entry = ifd + 2 + i * 12;
-        if (entry + 10 > b.length) return 1;
-        if (view.getUint16(entry, little) === 0x0112) return view.getUint16(entry + 8, little);
+  try {
+    let off = 2;
+    while (off + 4 < b.length) {
+      if (b[off] !== 0xff) return 1;
+      const marker = b[off + 1];
+      const len = view.getUint16(off + 2);
+      if (marker === 0xe1 && view.getUint32(off + 4) === 0x45786966) {
+        const tiff = off + 10;
+        const little = view.getUint16(tiff) === 0x4949;
+        const ifd = tiff + view.getUint32(tiff + 4, little);
+        const count = view.getUint16(ifd, little);
+        for (let i = 0; i < count; i++) {
+          const entry = ifd + 2 + i * 12;
+          if (entry + 10 > b.length) return 1;
+          if (view.getUint16(entry, little) === 0x0112) return view.getUint16(entry + 8, little);
+        }
+        return 1;
       }
-      return 1;
+      if (marker === 0xda) return 1;
+      off += 2 + len;
     }
-    if (marker === 0xda) return 1;
-    off += 2 + len;
+  } catch {
+    // Truncated or corrupt EXIF block: offsets point past the end of the file.
   }
   return 1;
 }
@@ -190,7 +194,7 @@ function jpegOrientation(b: Uint8Array): number {
 // ---------------------------------------------------------------------------
 // Drawing text in "visual" coordinates (as the page is displayed, honouring /Rotate)
 
-interface VisualBox {
+export interface VisualBox {
   width: number;
   height: number;
   /** Maps a visual point (origin bottom-left of the displayed page) to PDF user space. */
@@ -199,7 +203,7 @@ interface VisualBox {
   angle: number;
 }
 
-function visualBox(page: PDFPage): VisualBox {
+export function visualBox(page: PDFPage): VisualBox {
   const { x: ox, y: oy, width: W, height: H } = page.getCropBox();
   const r = norm(page.getRotation().angle);
   const at = (x: number, y: number) => ({ x: ox + x, y: oy + y });

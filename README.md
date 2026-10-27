@@ -1,7 +1,10 @@
 # easyPDF
 
+[![CI](https://github.com/Marwan-Alnabhani/EasyPDF/actions/workflows/ci.yml/badge.svg)](https://github.com/Marwan-Alnabhani/EasyPDF/actions/workflows/ci.yml)
+
 A free, private PDF toolkit that runs entirely on your device, in the browser or as a Windows
-desktop app. Files are never uploaded: all processing happens locally, and the app works offline.
+desktop app. There is no backend: files are processed by code running on your device, and the desktop
+app works without an internet connection.
 
 ## Tools
 
@@ -39,6 +42,15 @@ npm run preview      # http://127.0.0.1:4173
 
 Both servers listen on `127.0.0.1` only, so they are not reachable from other machines.
 
+Checks:
+
+```bash
+npm test             # unit tests (Vitest)
+npm run typecheck    # TypeScript
+```
+
+GitHub Actions runs these, the web build and a Rust check with `cargo audit` on every push and pull request.
+
 ## Desktop app (Windows)
 
 easyPDF is also packaged as a native desktop app with [Tauri](https://tauri.app). It uses the
@@ -55,7 +67,20 @@ npm run desktop          # run in a window with hot reload
 npm run desktop:build    # produce the installers in src-tauri/target/release/bundle/
 ```
 
-The app version comes from `package.json` (`src-tauri/Cargo.toml` should be kept in step with it).
+### Releasing
+
+1. Set the new version in `package.json` and `src-tauri/Cargo.toml` (they must match), and commit.
+2. Tag and push it:
+
+   ```bash
+   git tag v1.0.1
+   git push origin v1.0.1
+   ```
+
+3. GitHub Actions builds the Windows installers and attaches them to a **draft** release. Review it on the
+   Releases page and click **Publish**.
+
+The workflow refuses to build if the tag doesn't match the version in both files.
 
 In the desktop app, downloads become a native **Save as…** dialog. Drag-and-drop from Explorer works as usual.
 
@@ -72,7 +97,10 @@ Desktop security model:
 - **No external requests.** pdf.js fonts, CMaps and decoders are bundled locally (`scripts/copy-pdfjs-assets.mjs`).
 - **Strict Content-Security-Policy** in production builds: the page can only load its own files and cannot send data anywhere.
   It is defined once in `src-tauri/tauri.conf.json` and shared by the web build and the desktop app.
-- All dependencies are free, open-source (MIT / Apache-2.0 / ISC).
+- All dependencies are free and open source. The build generates `THIRD_PARTY_LICENSES.txt`
+  (`scripts/third-party-licenses.mjs`) with the license of everything that ships: it is served next to the
+  web app and installed next to the desktop app.
+- Found a security problem? See [SECURITY.md](SECURITY.md) for how to report it privately.
 
 ## Known limitations
 

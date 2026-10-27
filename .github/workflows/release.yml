@@ -1,0 +1,57 @@
+name: Release
+
+# Pushing a tag like v1.0.1 builds the Windows installers and attaches them to a
+# draft GitHub release. Review the draft on the Releases page, then publish it.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    name: Build Windows installers
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check the tag matches the app version
+        shell: bash
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          npm_version=$(node -p "require('./package.json').version")
+          cargo_version=$(sed -n 's/^version = "\(.*\)"/\1/p' src-tauri/Cargo.toml | head -1)
+          echo "tag=$tag package.json=$npm_version Cargo.toml=$cargo_version"
+          if [ "$tag" != "$npm_version" ] || [ "$tag" != "$cargo_version" ]; then
+            echo "::error::Tag v$tag doesn't match package.json ($npm_version) and src-tauri/Cargo.toml ($cargo_version). Update both, commit, and tag again."
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: npm ci
+      - run: npm test
+
+      # Runs `npm run build` (via beforeBuildCommand), compiles the app and makes the NSIS and MSI installers.
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: easyPDF ${{ github.ref_name }}
+          releaseBody: |
+            Windows installers:
+            - `easyPDF_<version>_x64-setup.exe`: installs for the current user, no admin rights needed
+            - `easyPDF_<version>_x64_en-US.msi`: for managed or system-wide installs
+
+            The installers aren't code-signed yet, so Windows SmartScreen may warn on first run
+            ("More info" → "Run anyway").
+          releaseDraft: true
+          prerelease: false
