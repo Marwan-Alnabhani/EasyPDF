@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Minimal permissions. The UI gets no file-system or dialog access; saving goes through the app's own save_file command, which only writes where the user chose.",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}
