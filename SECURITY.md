@@ -14,9 +14,6 @@ Include what you can of:
 - steps or a sample file to reproduce it (attach the file to the private report, not anywhere public)
 - the easyPDF version, and whether you used the web app or the desktop app
 
-You should get a reply within a week. Once a fix is released, the report can be published with credit
-to you, if you'd like.
-
 ## Supported versions
 
 Only the latest release gets security fixes.
